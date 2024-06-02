@@ -48,17 +48,7 @@ const renderBoard = () => {
                         row: parseInt(squareElement.dataset.row),
                         col: parseInt(squareElement.dataset.col)
                     };
-                    // Check if target square is valid
-                    // if (isNaN(targetSquare.row) || isNaN(targetSquare.col)) {
-                    //     const targetParentSquare = e.target.parentElement;
-                    //     targetSquare.row = parseInt(targetParentSquare.dataset.row);
-                    //     targetSquare.col = parseInt(targetParentSquare.dataset.col);
-                    // }
                     handleMove(sourceSquare, targetSquare);
-                    // socket.emit("move", {
-                    //     from: sourceSquare,
-                    //     to: targetSquare
-                    // });
                 }
             });
             boardElement.appendChild(squareElement);
@@ -70,74 +60,48 @@ const renderBoard = () => {
 };
 
 const handleMove = (sourceSquare, targetSquare) => {
-    console.log("Inside handleMove");
     const move = {
         from: `${String.fromCharCode(97 + sourceSquare.col)}${8 - sourceSquare.row}`,
         to: `${String.fromCharCode(97 + targetSquare.col)}${8 - targetSquare.row}`,
         promotion: "q" // Assuming promotion to queen, can be dynamic based on user input
     };
     socket.emit("move",move);
-    renderBoard();
+    // renderBoard();
 };
 
 const getPieceUnicode = (piece) => {
-    // const unicodePieces = {
-    //     p: "♟︎", // Pawn
-    //     r: "♜", // Rook
-    //     n: "♞", // Knight
-    //     b: "♝", // Bishop
-    //     q: "♛", // Queen
-    //     k: "♚", // King
-    //     P: "♙", // Pawn
-    //     R: "♖", // Rook
-    //     N: "♘", // Knight
-    //     B: "♗", // Bishop
-    //     Q: "♕", // Queen
-    //     K: "♔", // King
-    // };
     const unicodePieces = {
-        p: "♟︎", // Pawn
-        r: "♜", // Rook
-        n: "♞", // Knight
-        b: "♝", // Bishop
-        q: "♛", // Queen
-        k: "♚", // King
-        P: "♟︎", // Pawn
-        R: "♜", // Rook
-        N: "♞", // Knight
-        B: "♝", // Bishop
-        Q: "♛", // Queen
-        K: "♚", // King
+        p: "♙", 
+        r: "♖", 
+        n: "♘", 
+        b: "♗", 
+        q: "♕", 
+        k: "♔", 
     };
     return unicodePieces[piece.type] || "";
 };
 
 socket.on("playerRole", (role) => {
     playerRole = role;
-    console.log("onPlayerRole", role);
     renderBoard();
 });
 
 socket.on("spectatorRole", () => {
     playerRole = null;
-    console.log("onSpectatorRole")
     renderBoard();
 });
 
 socket.on("invalidMove", (move) => {
-    console.log("onInvalidMove", move);
-    alert(`Invalid move ${move}`);
+    alert(`Invalid move`);
 });
 
 socket.on("boardState", (fen) => {
     chess.load(fen);
-    console.log("onBoardState", fen);
     renderBoard();
 });
 
 socket.on("move", (move) => {
     chess.move(move);
-    console.log("onMove", move)
     renderBoard();
 });
 

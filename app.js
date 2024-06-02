@@ -10,7 +10,7 @@ app.set('view engine', 'ejs');
 app.use(express.static(path.join(__dirname, 'public')))
 
 const chess = new Chess()
-let currentPlayesrs = "W"
+// let currentPlayesrs = "W"
 let players = {}
 
 const io = socket(server)
@@ -40,8 +40,8 @@ io.on('connection', (client) => {
 
     client.on("move", (move) => {
         try {
-            if (chess.turn() === 'w' && client.id === players.white) return
-            if (chess.turn() === 'b' && client.id === players.black) return
+            if (chess.turn() === 'w' && client.id !== players.white) return
+            if (chess.turn() === 'b' && client.id !== players.black) return
             let calculatedMove = chess.move(move)
             if (calculatedMove) {
                 io.emit('move', calculatedMove)
@@ -50,7 +50,6 @@ io.on('connection', (client) => {
                 client.emit('invalidMove', move)
             }
         } catch (e) {
-            console.log(e)
             client.emit('invalidMove', move)
         }
     })
