@@ -15,37 +15,37 @@ let players = {}
 
 const io = socket(server)
 io.on('connection', (client) => {
-    client.on('clientConnect', () => {
-        if (!players.white) {
-            players.white = client.id
-            client.emit('playerConnect', 'white')
-        }
-        if (!players.black) {
-            players.black = client.id
-            client.emit('playerConnect', 'black')
-        } else {
-            client.emit('playerConnect', 'spective')
-        }
-        client.emit('boardState', chess.fen())
-    })
+    console.log("client connected")
+    if (!players.white) {
+        players.white = client.id
+        client.emit('playerRole', 'w')
+    }
+    else if (!players.black) {
+        players.black = client.id
+        client.emit('playerRole', 'b')
+    } else {
+        client.emit('spectatorRole')
+    }
+    // client.emit('boardState', chess.fen())
     //need to update once player is disconnected
     client.on('disconnect', () => {
         if (players.white === client.id) {
-            client.emit('endGame',)
+            delete players.white
+            // client.emit('endGame',)
         }
         if (players.black === client.id) {
-
+            delete players.black
         }
     })
 
     client.on("move", (move) => {
         try {
-            if (chess.turn() === 'w' && client.id === players.black) return
+            if (chess.turn() === 'w' && client.id === players.white) return
             if (chess.turn() === 'b' && client.id === players.black) return
             let calculatedMove = chess.move(move)
             if (calculatedMove) {
-                client.emit('move', calculatedMove)
-                client.emit('boardState', chess.fen())
+                io.emit('move', calculatedMove)
+                io.emit('boardState', chess.fen())
             } else {
                 client.emit('invalidMove', move)
             }
